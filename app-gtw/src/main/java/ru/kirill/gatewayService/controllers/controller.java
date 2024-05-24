@@ -15,7 +15,6 @@ import java.util.*;
 public class controller {
     @Autowired
     Keycloak keycloak;
-
     @GetMapping
     public java.lang.String getHello(){
         return "hello";

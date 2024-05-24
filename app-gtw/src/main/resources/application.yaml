@@ -8,7 +8,7 @@ spring:
       resourceserver:
         jwt:
           jwk-set-uri:
-            http://localhost:8080/realms/testRealm/protocol/openid-connect/certs
+            http://${keycloak.host}:${keycloak.port}/realms/${keycloak.realm}/protocol/openid-connect/certs
   cloud:
     gateway:
       default-filters:
@@ -16,11 +16,11 @@ spring:
         - AddResponseHeader=Access-Control-Origin, *
       routes:
         - id: auth
-          uri: http://localhost:8080
+          uri: http://${keycloak.host}:${keycloak.port}
           predicates:
             - Path=/openid-connect/**
           filters:
-            - RewritePath=/openid-connect, /realms/testRealm/protocol/openid-connect
+            - RewritePath=/openid-connect, /realms/${keycloak.realm}/protocol/openid-connect
 
         - id: portal
           uri: http://localhost:8082
@@ -55,3 +55,12 @@ eureka:
     serviceUrl:
       defaultZone:
         http://localhost:8761/eureka/
+
+keycloak:
+  admin:
+    username: ${KEYCLOAK_ADMIN_USERNAME}
+    password: ${KEY_CLOAK_PASSWORD}
+  realm: ${KEYCLOAK_REALM}
+  host: localhost
+  port: 8080
+

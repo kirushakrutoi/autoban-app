@@ -7,6 +7,8 @@ import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.RolesRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -21,22 +23,30 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Data
-@AllArgsConstructor
 @Component
 public class AccountAuthenticationProvider implements ReactiveAuthenticationManager {
+    @Value("${keycloak.realm}")
+    private String KEYCLOAK_REALM;
+    private final String USER_ID = "sub";
     private final Keycloak keycloak;
     private final ReactiveJwtDecoder jwtDecoder;
+
+    @Autowired
+    public AccountAuthenticationProvider(Keycloak keycloak, ReactiveJwtDecoder jwtDecoder) {
+        this.keycloak = keycloak;
+        this.jwtDecoder = jwtDecoder;
+    }
 
     @Override
     public Mono<Authentication> authenticate(Authentication authentication) {
         BearerTokenAuthenticationToken authenticationToken = (BearerTokenAuthenticationToken) authentication;
 
         Mono<String> userId = getJwt(authenticationToken).map(jwt ->
-            jwt.getClaimAsString("sub")
+            jwt.getClaimAsString(USER_ID)
         );
 
         Mono<UserDetails> user = userId.map(id -> {
-            UserResource userResource = keycloak.realm("testRealm").users().get(id);
+            UserResource userResource = keycloak.realm(KEYCLOAK_REALM).users().get(id);
 
             return getUserDetails(userResource);
         });

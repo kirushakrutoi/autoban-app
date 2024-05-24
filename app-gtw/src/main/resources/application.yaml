@@ -1,0 +1,57 @@
+server:
+  port:
+    8081
+
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri:
+            http://localhost:8080/realms/testRealm/protocol/openid-connect/certs
+  cloud:
+    gateway:
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Origin, RETAIN_LAST
+        - AddResponseHeader=Access-Control-Origin, *
+      routes:
+        - id: auth
+          uri: http://localhost:8080
+          predicates:
+            - Path=/openid-connect/**
+          filters:
+            - RewritePath=/openid-connect, /realms/testRealm/protocol/openid-connect
+
+        - id: portal
+          uri: http://localhost:8082
+          predicates:
+            - Path=/portal/**
+          filters:
+            - RewritePath=/portal, /
+
+        - id: logist
+          uri: http://localhost:8083
+          predicates:
+            - Path=/logist/**
+          filters:
+            - RewritePath=/logist, /
+
+        - id: driver
+          uri: http://localhost:8084
+          predicates:
+            - Path=/driver/**
+          filters:
+            - RewritePath=/driver, /
+
+        - id: dwh
+          uri: http://localhost:8085
+          predicates:
+            - Path=/dwh/**
+          filters:
+            - RewritePath=/dwh, /
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone:
+        http://localhost:8761/eureka/

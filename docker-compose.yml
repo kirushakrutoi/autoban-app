@@ -1,0 +1,34 @@
+version: "3.9"
+
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:22.0.0
+    environment:
+      KC_DB_URL: jdbc:postgresql://keycloakdb:5432/keycloakdb
+      KC_DB_USERNAME: kirill
+      KC_DB_PASSWORD: 12345
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    volumes:
+      - ./app-gtw/src/main/resources/keycloak/import/testRealm.json:/opt/keycloak/data/import/realm.json
+    ports:
+      - "8080:8080"
+    depends_on:
+      - keycloakdb
+    command:
+      - start-dev
+      - --db postgres
+      - --import-realm
+      - --features admin-fine-grained-authz
+
+  keycloakdb:
+    image: postgres:15
+    container_name: keycloakdb
+    volumes:
+      - ~/data/postgres/keycloakdb:/var/lib/postgresql/data/
+    environment:
+      POSTGRES_DB: keycloakdb
+      POSTGRES_USER: kirill
+      POSTGRES_PASSWORD: 12345
+    ports:
+      - "5432:5432"

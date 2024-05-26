@@ -18,11 +18,11 @@ public class GeneratePasswordService {
 
         List<Character> password = new ArrayList<>();
 
-        password.add(CHAR_SET.charAt(random.nextInt(10)));
+        password.add(CHAR_SET.charAt(52 + random.nextInt(10)));
 
-        password.add(CHAR_SET.charAt(10 + random.nextInt(26)));
+        password.add(CHAR_SET.charAt(random.nextInt(26)));
 
-        password.add(CHAR_SET.charAt(36 + random.nextInt(26)));
+        password.add(CHAR_SET.charAt(26 + random.nextInt(26)));
 
         while (password.size() < PASSWORD_LENGTH) {
             password.add(CHAR_SET.charAt(random.nextInt(CHAR_SET.length())));

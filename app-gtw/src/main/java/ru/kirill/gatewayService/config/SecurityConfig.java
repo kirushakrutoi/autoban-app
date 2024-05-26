@@ -20,6 +20,7 @@ public class SecurityConfig {
         return http
                 .authenticationManager(authenticationProvider)
                 .authorizeExchange(configure -> configure
+                        .pathMatchers("/portal/**").permitAll()
                         .pathMatchers("/openid-connect/**").permitAll()
                         .pathMatchers("/hello/admin").hasAuthority("ROLE_ADMIN")
                         .pathMatchers("/hello/user").hasAuthority("USER")

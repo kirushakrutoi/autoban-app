@@ -6,3 +6,12 @@ eureka:
     serviceUrl:
       defaultZone:
         http://localhost:8761/eureka/
+
+
+keycloak:
+  admin:
+    username: ${KEYCLOAK_ADMIN_USERNAME}
+    password: ${KEY_CLOAK_PASSWORD}
+  realm: ${KEYCLOAK_REALM}
+  host: localhost
+  port: 8080

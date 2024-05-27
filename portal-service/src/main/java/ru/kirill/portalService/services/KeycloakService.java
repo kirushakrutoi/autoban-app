@@ -4,9 +4,11 @@ import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import lombok.Data;
 import org.keycloak.admin.client.Keycloak;
+import org.keycloak.admin.client.resource.ClientResource;
 import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.admin.client.resource.RoleResource;
 import org.keycloak.admin.client.resource.UserResource;
+import org.keycloak.representations.idm.ClientRepresentation;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
@@ -16,10 +18,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import ru.kirill.portalService.mappers.Mapper;
+import ru.kirill.portalService.model.DTOs.AdataDto;
+import ru.kirill.portalService.model.DTOs.CompanyDTO;
 import ru.kirill.portalService.model.DTOs.RegisterDTO;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 @Service
 @Data
@@ -30,9 +37,11 @@ public class KeycloakService {
     private String KEYCLOAK_REALM;
     private String ROLE_REGISTER = "REGISTER";
     private MailSenderService mailSenderService;
+    @Autowired
+    private AdataService adataService;
 
     @Autowired
-    public KeycloakService(Keycloak keycloak, RealmResource realm, MailSenderService mailSenderService) {
+    public KeycloakService(Keycloak keycloak, RealmResource realm, MailSenderService mailSenderService, AdataService adataService) {
         this.keycloak = keycloak;
         this.realm = realm;
         this.mailSenderService = mailSenderService;
@@ -50,6 +59,17 @@ public class KeycloakService {
         return new ResponseEntity<>(HttpStatus.valueOf(result.getStatus()));
     }
 
+    public ResponseEntity<HttpStatus> createCompany(AdataDto adataDto){
+        CompanyDTO companyDTO = adataService.getInfoByInn(adataDto);
+        ClientRepresentation clientRepresentation = Mapper.convertToClientRepresentation(companyDTO);
+        Response response = realm.clients().create(clientRepresentation);
+
+        ClientResource clientResource = realm.clients().get(getCreatedClientId(response));
+        createClientRoles(clientResource);
+
+        return new ResponseEntity<>(HttpStatus.valueOf(response.getStatus()));
+    }
+
     private void sendPassword(UserRepresentation userRepresentation) {
         CredentialRepresentation credential = userRepresentation.getCredentials().get(0);
 
@@ -58,7 +78,7 @@ public class KeycloakService {
         mailSenderService.sendSimpleMessage(userRepresentation.getEmail(), "Password from keycloak", password);
     }
 
-    private String getCreatedId(Response response) {
+    private String getCreatedClientId(Response response){
         URI location = response.getLocation();
 
         if (!response.getStatusInfo().equals(Response.Status.CREATED)) {
@@ -75,9 +95,39 @@ public class KeycloakService {
         return path.substring(path.lastIndexOf('/') + 1);
     }
 
+    private String getCreatedUserId(Response response) {
+        URI location = response.getLocation();
+
+        if (!response.getStatusInfo().equals(Response.Status.CREATED)) {
+            Response.StatusType statusInfo = response.getStatusInfo();
+            throw new WebApplicationException("Create method returned status " +
+                    statusInfo.getReasonPhrase() + " (Code: " + statusInfo.getStatusCode() + "); expected status: Created (201)", response);
+        }
+
+        if (location == null) {
+            return null;
+        }
+
+        String path = location.getPath();
+        return path.substring(path.lastIndexOf('/') + 1);
+    }
+
+    private void createClientRoles(ClientResource clientResource){
+        RoleRepresentation adminRole = new RoleRepresentation();
+        adminRole.setName("ADMIN");
+        RoleRepresentation driverRole = new RoleRepresentation();
+        driverRole.setName("DRIVER");
+        RoleRepresentation logistRole = new RoleRepresentation();
+        logistRole.setName("LOGIST");
+
+        clientResource.roles().create(adminRole);
+        clientResource.roles().create(driverRole);
+        clientResource.roles().create(logistRole);
+    }
+
     private void setRole(Response response, String role){
         RoleResource roleResource = realm.roles().get(role);
-        UserResource userResource = realm.users().get(getCreatedId(response));
+        UserResource userResource = realm.users().get(getCreatedUserId(response));
 
         RoleRepresentation rolesRepresentation = roleResource.toRepresentation();
 

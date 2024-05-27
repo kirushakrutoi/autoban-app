@@ -20,6 +20,8 @@ spring:
           starttls:
             enable: true
 
+adata:
+  token: Token 7bfee02a63ecf31a6233e7f8c9c7827d8fd262e0
 
 keycloak:
   admin:
@@ -28,3 +30,4 @@ keycloak:
   realm: ${KEYCLOAK_REALM}
   host: localhost
   port: 8080
+

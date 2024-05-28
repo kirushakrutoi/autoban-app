@@ -28,7 +28,7 @@ spring:
             - Path=/portal/**
           filters:
             - RewritePath=/portal, /
-            - TokenRelay=
+            - Portal=
 
         - id: logist
           uri: http://localhost:8083

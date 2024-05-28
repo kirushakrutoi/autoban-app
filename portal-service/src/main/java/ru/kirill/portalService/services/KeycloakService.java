@@ -21,6 +21,7 @@ import ru.kirill.portalService.mappers.Mapper;
 import ru.kirill.portalService.model.DTOs.AdataDto;
 import ru.kirill.portalService.model.DTOs.CompanyDTO;
 import ru.kirill.portalService.model.DTOs.RegisterDTO;
+import ru.kirill.portalService.model.User;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -59,13 +60,18 @@ public class KeycloakService {
         return new ResponseEntity<>(HttpStatus.valueOf(result.getStatus()));
     }
 
-    public ResponseEntity<HttpStatus> createCompany(AdataDto adataDto){
+    public ResponseEntity<HttpStatus> createCompany(AdataDto adataDto, User user){
         CompanyDTO companyDTO = adataService.getInfoByInn(adataDto);
         ClientRepresentation clientRepresentation = Mapper.convertToClientRepresentation(companyDTO);
         Response response = realm.clients().create(clientRepresentation);
 
         ClientResource clientResource = realm.clients().get(getCreatedClientId(response));
         createClientRoles(clientResource);
+
+        UserResource userResource = realm.users().get(user.getUserId());
+        RoleResource roleResource = clientResource.roles().get("ADMIN");
+        RoleRepresentation roleRepresentation = roleResource.toRepresentation();
+        userResource.roles().clientLevel(getCreatedClientId(response)).add(Collections.singletonList(roleRepresentation));
 
         return new ResponseEntity<>(HttpStatus.valueOf(response.getStatus()));
     }

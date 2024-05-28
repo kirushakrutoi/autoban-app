@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.UserResource;
+import org.keycloak.representations.idm.ClientMappingsRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.RolesRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
@@ -67,8 +68,25 @@ public class AccountAuthenticationProvider implements ReactiveAuthenticationMana
         String userId = userRepresentation.getId();
         String username = userRepresentation.getUsername();
         Set<String> roles = getRoles(user);
+        Map<String, String> clientRoles = getClientRoles(user);
 
-        return new UserDetailsImpl(userId, username, roles);
+        return new UserDetailsImpl(userId, username, roles, clientRoles);
+    }
+
+    private Map<String, String> getClientRoles(UserResource user) {
+        Map<String, ClientMappingsRepresentation> clientListRoles = user.roles().getAll().getClientMappings();
+        Map<String, String> clientRoles = new HashMap<>();
+
+        if(clientListRoles == null)
+            return new HashMap<>();
+
+        for(Map.Entry<String, ClientMappingsRepresentation> entry : clientListRoles.entrySet()){
+            String clientId = entry.getValue().getClient();
+            String role = entry.getValue().getMappings().get(0).getName();
+
+            clientRoles.put(clientId, role);
+        }
+        return clientRoles;
     }
 
     private Set<String> getRoles(UserResource user){

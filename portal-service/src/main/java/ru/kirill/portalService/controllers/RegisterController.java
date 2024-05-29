@@ -14,25 +14,28 @@ import ru.kirill.portalService.model.DTOs.RegisterDTO;
 import ru.kirill.portalService.model.User;
 import ru.kirill.portalService.services.AdataService;
 import ru.kirill.portalService.services.KeycloakService;
+import ru.kirill.portalService.services.UserService;
 
 @RestController
 @RequestMapping("")
 public class RegisterController {
     @Autowired
+    private UserService userService;
+    @Autowired
     private KeycloakService keycloakService;
     @Autowired
     private AdataService adataService;
-
+/*
     @PostMapping("/register")
     public ResponseEntity<HttpStatus> createRegister(@RequestBody RegisterDTO registerDTO) {
-        return keycloakService.createRegister(registerDTO);
+        return userService.createRegister(registerDTO);
 
     }
 
     @PostMapping("/register/create/company")
     public ResponseEntity<HttpStatus> query(@RequestBody AdataDto adataDto, @RequestHeader HttpHeaders headers) throws JsonProcessingException {
         return keycloakService.createCompany(adataDto, Mapper.getUserFromHeaders(headers));
-    }
+    }*/
 
 
 

@@ -21,13 +21,11 @@ import ru.kirill.portalService.mappers.Mapper;
 import ru.kirill.portalService.model.DTOs.AdataDto;
 import ru.kirill.portalService.model.DTOs.CompanyDTO;
 import ru.kirill.portalService.model.DTOs.RegisterDTO;
+import ru.kirill.portalService.model.DTOs.UserDTO;
 import ru.kirill.portalService.model.User;
 
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @Data
@@ -49,9 +47,7 @@ public class KeycloakService {
     }
 
 
-    public ResponseEntity<HttpStatus> createRegister(RegisterDTO registerDTO){
-        UserRepresentation userRepresentation = Mapper.convertToUserRepresentation(registerDTO);
-
+    public ResponseEntity<HttpStatus> addUser(UserRepresentation userRepresentation){
         Response result = realm.users().create(userRepresentation);
 
         setRole(result, ROLE_REGISTER);
@@ -60,20 +56,52 @@ public class KeycloakService {
         return new ResponseEntity<>(HttpStatus.valueOf(result.getStatus()));
     }
 
-    public ResponseEntity<HttpStatus> createCompany(AdataDto adataDto, User user){
-        CompanyDTO companyDTO = adataService.getInfoByInn(adataDto);
-        ClientRepresentation clientRepresentation = Mapper.convertToClientRepresentation(companyDTO);
+    public ResponseEntity<HttpStatus> createCompany(ClientRepresentation clientRepresentation, User user){
         Response response = realm.clients().create(clientRepresentation);
 
         ClientResource clientResource = realm.clients().get(getCreatedClientId(response));
         createClientRoles(clientResource);
 
-        UserResource userResource = realm.users().get(user.getUserId());
-        RoleResource roleResource = clientResource.roles().get("ADMIN");
-        RoleRepresentation roleRepresentation = roleResource.toRepresentation();
-        userResource.roles().clientLevel(getCreatedClientId(response)).add(Collections.singletonList(roleRepresentation));
+        addClientRole(user.getUserId(), clientResource, getCreatedClientId(response), "ADMIN");
 
         return new ResponseEntity<>(HttpStatus.valueOf(response.getStatus()));
+    }
+
+    public UserRepresentation getUserRepresentationByUsername(String username){
+        return realm.users().searchByUsername(username, true).get(0);
+    }
+
+    public UserResource getUserResource(String id){
+        return realm.users().get(id);
+    }
+
+    public ClientResource getClientResourceById(String clientId){
+        ClientRepresentation clientRepresentation = realm.clients().findByClientId(clientId).get(0);
+        return realm.clients().get(clientRepresentation.getId());
+    }
+
+    public String getUserIdByUserName(String username){
+        UserRepresentation userRepresentation = realm.users().searchByUsername(username, true).get(0);
+        return userRepresentation.getId();
+    }
+
+    public String getClientIdByName(String companyName){
+        return realm.clients().findByClientId(companyName).get(0).getId();
+    }
+
+    public void addClientRole(String userId, ClientResource clientResource, String clientId,String role){
+        UserResource userResource = realm.users().get(userId);
+        RoleResource roleResource = clientResource.roles().get(role);
+        RoleRepresentation roleRepresentation = roleResource.toRepresentation();
+        userResource.roles().clientLevel(clientId).add(Collections.singletonList(roleRepresentation));
+    }
+
+    public void deleteClientRole(String userId, String clientID) {
+        UserResource userResource = realm.users().get(userId);
+        List<RoleRepresentation> roles = Optional.ofNullable(userResource.roles().clientLevel(clientID).listAll()).orElse(new ArrayList<>());
+        if(roles.isEmpty())
+            return;
+        userResource.roles().clientLevel(clientID).remove(roles);
     }
 
     private void sendPassword(UserRepresentation userRepresentation) {
@@ -139,4 +167,5 @@ public class KeycloakService {
 
         userResource.roles().realmLevel().add(Collections.singletonList(rolesRepresentation));
     }
+
 }

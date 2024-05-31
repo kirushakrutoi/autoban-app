@@ -47,6 +47,8 @@ public class UserController {
             return  new ResponseEntity<>("The user has been successfully created", HttpStatus.CREATED);
         } catch (UserNotCreatedException e) {
             return new ResponseEntity<>(e.getMessage(), e.getStatus());
+        } catch (UserNotFoundException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -81,6 +83,8 @@ public class UserController {
             return new ResponseEntity<>(e.getMessage(), e.getStatus());
         } catch (RoleNotSetException e) {
             return new ResponseEntity<>(e.getMessage(), e.getStatus());
+        } catch (UserNotFoundException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 

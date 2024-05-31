@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.kirill.portalService.exceptions.companyexceptions.CompanyNotCreatedException;
 import ru.kirill.portalService.exceptions.companyexceptions.CompanyNotFoundException;
 import ru.kirill.portalService.exceptions.companyexceptions.InvalidInnException;
+import ru.kirill.portalService.exceptions.userexception.UserNotFoundException;
 import ru.kirill.portalService.mappers.Mapper;
 import ru.kirill.portalService.model.DTOs.*;
 import ru.kirill.portalService.services.AdataService;
@@ -44,7 +45,7 @@ public class CompanyController {
             return new ResponseEntity<>("The company has been successfully added", HttpStatus.CREATED);
         } catch (CompanyNotCreatedException e) {
             return new ResponseEntity<>(e.getMessage(), e.getStatus());
-        } catch (InvalidInnException e){
+        } catch (InvalidInnException | UserNotFoundException | CompanyNotFoundException e){
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }

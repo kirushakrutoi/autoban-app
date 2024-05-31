@@ -47,7 +47,7 @@ public class UserService {
         this.keycloakService = keycloakService;
     }
 
-    public void createRegister(RegisterDTO registerDTO) throws UserNotCreatedException {
+    public void createRegister(RegisterDTO registerDTO) throws UserNotCreatedException, UserNotFoundException {
         UserRepresentation userRepresentation = Mapper.convertToUserRepresentation(registerDTO);
         try {
             keycloakService.addUser(userRepresentation);
@@ -67,7 +67,7 @@ public class UserService {
         setClientRole(companyName, companyRole, userDto.getUsername());
     }
 
-    public void createUserAndAddClientRole(NewUserDTO newUserDTO, User adminUser) throws UserNotCreatedException, RoleNotSetException {
+    public void createUserAndAddClientRole(NewUserDTO newUserDTO, User adminUser) throws UserNotCreatedException, RoleNotSetException, UserNotFoundException {
         String companyName = newUserDTO.getCompanyName();
         String companyRole = newUserDTO.getCompanyRole();
 

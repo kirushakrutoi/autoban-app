@@ -44,7 +44,7 @@ public class KeycloakService {
     }
 
 
-    public void addUser(UserRepresentation userRepresentation) throws KeycloakException {
+    public void addUser(UserRepresentation userRepresentation) throws KeycloakException, UserNotFoundException {
         Response result = realm.users().create(userRepresentation);
 
         setRole(result, ROLE_REGISTER);
@@ -52,10 +52,10 @@ public class KeycloakService {
         sendPassword(userRepresentation);
     }
 
-    public void createCompany(ClientRepresentation clientRepresentation, User user) throws KeycloakException {
+    public void createCompany(ClientRepresentation clientRepresentation, User user) throws KeycloakException, UserNotFoundException, ClientNotFoundException {
         Response response = realm.clients().create(clientRepresentation);
 
-        ClientResource clientResource = realm.clients().get(getCreatedId(response));
+        ClientResource clientResource = getClientResourceById(getCreatedId(response));
         createClientRoles(clientResource);
 
         addClientRole(user.getUserId(), clientResource, getCreatedId(response), "ADMIN");
@@ -101,15 +101,15 @@ public class KeycloakService {
         }
     }
 
-    public void addClientRole(String userId, ClientResource clientResource, String clientId,String role){
-        UserResource userResource = realm.users().get(userId);
+    public void addClientRole(String userId, ClientResource clientResource, String clientId,String role) throws UserNotFoundException {
+        UserResource userResource = getUserResource(userId);
         RoleResource roleResource = clientResource.roles().get(role);
         RoleRepresentation roleRepresentation = roleResource.toRepresentation();
         userResource.roles().clientLevel(clientId).add(Collections.singletonList(roleRepresentation));
     }
 
-    public void deleteClientRole(String userId, String clientID) {
-        UserResource userResource = realm.users().get(userId);
+    public void deleteClientRole(String userId, String clientID) throws UserNotFoundException {
+        UserResource userResource = getUserResource(userId);
         List<RoleRepresentation> roles = Optional.ofNullable(userResource.roles().clientLevel(clientID).listAll()).orElse(new ArrayList<>());
         if(roles.isEmpty())
             return;
@@ -162,9 +162,9 @@ public class KeycloakService {
         clientResource.roles().create(logistRole);
     }
 
-    private void setRole(Response response, String role) throws KeycloakException {
+    private void setRole(Response response, String role) throws KeycloakException, UserNotFoundException {
         RoleResource roleResource = realm.roles().get(role);
-        UserResource userResource = realm.users().get(getCreatedId(response));
+        UserResource userResource = getUserResource(getCreatedId(response));
 
         RoleRepresentation rolesRepresentation = roleResource.toRepresentation();
 

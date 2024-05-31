@@ -16,6 +16,7 @@ import ru.kirill.portalService.exceptions.companyexceptions.CompanyNotFoundExcep
 import ru.kirill.portalService.exceptions.companyexceptions.InvalidInnException;
 import ru.kirill.portalService.exceptions.keycloakexceptions.ClientNotFoundException;
 import ru.kirill.portalService.exceptions.keycloakexceptions.KeycloakException;
+import ru.kirill.portalService.exceptions.userexception.UserNotFoundException;
 import ru.kirill.portalService.mappers.Mapper;
 import ru.kirill.portalService.model.DTOs.*;
 import ru.kirill.portalService.model.User;
@@ -43,7 +44,7 @@ public class CompanyService {
         this.keycloakService = keycloakService;
     }
 
-    public void createCompany(AdataDto adataDto, User user) throws CompanyNotCreatedException, InvalidInnException {
+    public void createCompany(AdataDto adataDto, User user) throws CompanyNotCreatedException, InvalidInnException, UserNotFoundException, CompanyNotFoundException {
         try {
             CompanyDTO companyDTO = adataService.getInfoByInn(adataDto);
             if(companyDTO.getName() == null || companyDTO.getName().isEmpty()){
@@ -54,6 +55,8 @@ public class CompanyService {
         } catch (KeycloakException e){
             throw new CompanyNotCreatedException(e.getMessage(),
                     (HttpStatus) HttpStatusCode.valueOf(e.getResponse().getStatus()));
+        } catch (ClientNotFoundException e) {
+            throw new CompanyNotFoundException(e.getMessage());
         }
     }
 

@@ -28,7 +28,6 @@ import java.util.stream.Collectors;
 @Data
 public class CompanyService {
     private KeycloakService keycloakService;
-    private final Keycloak keycloak;
     private final RealmResource realm;
     @Value("${keycloak.realm}")
     private String KEYCLOAK_REALM;
@@ -38,8 +37,7 @@ public class CompanyService {
     private AdataService adataService;
 
     @Autowired
-    public CompanyService(Keycloak keycloak, RealmResource realm, MailSenderService mailSenderService, AdataService adataService, KeycloakService keycloakService) {
-        this.keycloak = keycloak;
+    public CompanyService(RealmResource realm, MailSenderService mailSenderService, AdataService adataService, KeycloakService keycloakService) {
         this.realm = realm;
         this.mailSenderService = mailSenderService;
         this.keycloakService = keycloakService;

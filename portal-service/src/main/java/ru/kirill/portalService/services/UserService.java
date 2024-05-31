@@ -32,7 +32,6 @@ import java.util.List;
 @Data
 public class UserService {
     private final KeycloakService keycloakService;
-    private final Keycloak keycloak;
     private final RealmResource realm;
     @Value("${keycloak.realm}")
     private String KEYCLOAK_REALM;
@@ -42,8 +41,7 @@ public class UserService {
     private AdataService adataService;
 
     @Autowired
-    public UserService(Keycloak keycloak, RealmResource realm, MailSenderService mailSenderService, AdataService adataService, KeycloakService keycloakService) {
-        this.keycloak = keycloak;
+    public UserService(RealmResource realm, MailSenderService mailSenderService, AdataService adataService, KeycloakService keycloakService) {
         this.realm = realm;
         this.mailSenderService = mailSenderService;
         this.keycloakService = keycloakService;

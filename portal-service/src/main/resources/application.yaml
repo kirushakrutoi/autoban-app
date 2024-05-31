@@ -12,9 +12,9 @@ spring:
     init:
       mode: never
   datasource:
-    username: postgres
-    password: 124491
-    url: jdbc:postgresql://localhost:5432/portal
+    username: ${SPRING_DB_USERNAME}
+    password: ${SPRING_DB_PASSWORD}
+    url: ${SPRING_DB_URL}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:

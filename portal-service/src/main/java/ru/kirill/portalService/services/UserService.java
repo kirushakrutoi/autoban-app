@@ -11,8 +11,16 @@ import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import ru.kirill.portalService.exceptions.companyexceptions.CompanyNotFoundException;
+import ru.kirill.portalService.exceptions.keycloakexceptions.ClientNotFoundException;
+import ru.kirill.portalService.exceptions.keycloakexceptions.KeycloakException;
+import ru.kirill.portalService.exceptions.userexception.ForbiddenException;
+import ru.kirill.portalService.exceptions.userexception.RoleNotSetException;
+import ru.kirill.portalService.exceptions.userexception.UserNotCreatedException;
+import ru.kirill.portalService.exceptions.userexception.UserNotFoundException;
 import ru.kirill.portalService.mappers.Mapper;
 import ru.kirill.portalService.model.DTOs.*;
 import ru.kirill.portalService.model.User;
@@ -41,38 +49,39 @@ public class UserService {
         this.keycloakService = keycloakService;
     }
 
-    public ResponseEntity<HttpStatus> createRegister(RegisterDTO registerDTO){
+    public void createRegister(RegisterDTO registerDTO) throws UserNotCreatedException {
         UserRepresentation userRepresentation = Mapper.convertToUserRepresentation(registerDTO);
-        return keycloakService.addUser(userRepresentation);
+        try {
+            keycloakService.addUser(userRepresentation);
+        } catch (KeycloakException e) {
+            throw new UserNotCreatedException(e.getMessage(),
+                    (HttpStatus) HttpStatusCode.valueOf(e.getResponse().getStatus()));
+        }
     }
 
-    public ResponseEntity<HttpStatus> addClientRoleForExistUser(UserDTO userDto, User adminUser){
+    public void addClientRoleForExistUser(UserDTO userDto, User adminUser) throws RoleNotSetException {
         String companyName = userDto.getCompanyName();
         String companyRole = userDto.getCompanyRole();
 
         if(!checkAuthority(companyName, adminUser, companyRole))
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+            throw new RoleNotSetException("You don't have the necessary authority", HttpStatus.FORBIDDEN);
 
         setClientRole(companyName, companyRole, userDto.getUsername());
-
-        return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    public ResponseEntity<HttpStatus> createUserAndAddClientRole(NewUserDTO newUserDTO, User adminUser){
+    public void createUserAndAddClientRole(NewUserDTO newUserDTO, User adminUser) throws UserNotCreatedException, RoleNotSetException {
         String companyName = newUserDTO.getCompanyName();
         String companyRole = newUserDTO.getCompanyRole();
 
         if(!checkAuthority(companyName, adminUser, companyRole))
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+            throw new UserNotCreatedException("You don't have the necessary authority", HttpStatus.FORBIDDEN);
 
         createRegister(newUserDTO);
 
         setClientRole(companyName, companyRole, newUserDTO.getUsername());
-
-        return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    public ResponseEntity<HttpStatus> resetPassword(ResetPasswordDTO passwordDTO, User user) {
+    public void resetPassword(ResetPasswordDTO passwordDTO, User user) throws UserNotFoundException {
         UserResource userResource = keycloakService.getUserResource(user.getUserId());
 
         CredentialRepresentation credential = new CredentialRepresentation();
@@ -81,28 +90,32 @@ public class UserService {
         credential.setValue(passwordDTO.getNewPassword());
 
         userResource.resetPassword(credential);
-        return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    public ResponseEntity<HttpStatus> changeData(ChangeDataDTO changeDataDTO, User user){
+    public void changeData(ChangeDataDTO changeDataDTO, User user) throws UserNotFoundException {
         UserResource userResource = keycloakService.getUserResource(user.getUserId());
         UserRepresentation userRepresentation = userResource.toRepresentation();
 
         changeUserRepresentation(changeDataDTO, userRepresentation);
 
         userResource.update(userRepresentation);
-
-        return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    public List<UserDTO> getUsers(GetCompanyDTO companyDTO, User user){
+    public List<UserDTO> getUsers(GetCompanyDTO companyDTO, User user) throws ForbiddenException, CompanyNotFoundException {
         if(!user.getClientRoles().containsKey(companyDTO.getName())){
-            return null;
+            throw new ForbiddenException("You don't have the necessary authority");
         }
 
         if(!user.getClientRoles().get(companyDTO.getName()).equals("ADMIN")){
-            return null;
+            throw new ForbiddenException("You don't have the necessary authority");
         }
+
+        try {
+            keycloakService.getClientIdByName(companyDTO.getName());
+        } catch (ClientNotFoundException e){
+            throw new CompanyNotFoundException("Company not found");
+        }
+
 
         List<UserRepresentation> users = keycloakService.getUserHasClientRole(companyDTO.getName());
 
@@ -115,7 +128,6 @@ public class UserService {
         }
 
         return userDTOS;
-
     }
 
     public List<UserRepresentation> getUsersFromCompany(List<UserRepresentation> usersRepresentation, String companyName){
@@ -137,17 +149,23 @@ public class UserService {
             userRepresentation.setEmail(changeDataDTO.getEmail());
     }
 
-    public void setClientRole(String companyName, String companyRole, String username){
-        String id = keycloakService.getUserIdByUserName(username);
-        ClientResource clientResource = keycloakService.getClientResourceById(companyName);
-        String clientID = keycloakService.getClientIdByName(companyName);
-        keycloakService.deleteClientRole(id, clientID);
-        keycloakService.addClientRole(id, clientResource, clientID, companyRole);
+    public void setClientRole(String companyName, String companyRole, String username) throws RoleNotSetException {
+        try {
+            String id = keycloakService.getUserIdByUserName(username);
+            ClientResource clientResource = keycloakService.getClientResourceById(companyName);
+            String clientID = keycloakService.getClientIdByName(companyName);
+            keycloakService.deleteClientRole(id, clientID);
+            keycloakService.addClientRole(id, clientResource, clientID, companyRole);
+        } catch (Exception e){
+            throw new RoleNotSetException(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+
     }
 
     public boolean checkAuthority(String companyName, User adminUser, String newUserCompanyRole){
         if(!adminUser.getClientRoles().containsKey(companyName))
             return false;
+
         String userClientRole = adminUser.getClientRoles().get(companyName);
 
         if(userClientRole.equals("DRIVER"))

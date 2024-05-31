@@ -8,8 +8,14 @@ import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import ru.kirill.portalService.exceptions.companyexceptions.CompanyNotCreatedException;
+import ru.kirill.portalService.exceptions.companyexceptions.CompanyNotFoundException;
+import ru.kirill.portalService.exceptions.companyexceptions.InvalidInnException;
+import ru.kirill.portalService.exceptions.keycloakexceptions.ClientNotFoundException;
+import ru.kirill.portalService.exceptions.keycloakexceptions.KeycloakException;
 import ru.kirill.portalService.mappers.Mapper;
 import ru.kirill.portalService.model.DTOs.*;
 import ru.kirill.portalService.model.User;
@@ -39,21 +45,32 @@ public class CompanyService {
         this.keycloakService = keycloakService;
     }
 
-    public ResponseEntity<HttpStatus> createCompany(AdataDto adataDto, User user){
-        CompanyDTO companyDTO = adataService.getInfoByInn(adataDto);
-        ClientRepresentation clientRepresentation = Mapper.convertToClientRepresentation(companyDTO);
-        return keycloakService.createCompany(clientRepresentation, user);
+    public void createCompany(AdataDto adataDto, User user) throws CompanyNotCreatedException, InvalidInnException {
+        try {
+            CompanyDTO companyDTO = adataService.getInfoByInn(adataDto);
+            if(companyDTO.getName() == null || companyDTO.getName().isEmpty()){
+                throw new InvalidInnException("Incorrect inn");
+            }
+            ClientRepresentation clientRepresentation = Mapper.convertToClientRepresentation(companyDTO);
+            keycloakService.createCompany(clientRepresentation, user);
+        } catch (KeycloakException e){
+            throw new CompanyNotCreatedException(e.getMessage(),
+                    (HttpStatus) HttpStatusCode.valueOf(e.getResponse().getStatus()));
+        }
     }
 
 
-    public FullCompanyDTO getCompany(GetCompanyDTO getCompanyDTO) {
-        CompanyDTO companyDTO = new CompanyDTO();
-        ClientRepresentation clientRepresentation = keycloakService.getClientResourceById(getCompanyDTO.getName()).toRepresentation();
-        List<UserRepresentation> users = keycloakService.getUserHasClientRole(getCompanyDTO.name);
-        long countDriver = contUserByRole(users, getCompanyDTO.getName(), "DRIVER");
-        long countLogist = contUserByRole(users, getCompanyDTO.getName(), "LOGIST");
+    public FullCompanyDTO getCompany(GetCompanyDTO getCompanyDTO) throws CompanyNotFoundException {
+        try {
+            ClientRepresentation clientRepresentation = keycloakService.getClientResourceById(getCompanyDTO.getName()).toRepresentation();
+            List<UserRepresentation> users = keycloakService.getUserHasClientRole(getCompanyDTO.name);
+            long countDriver = contUserByRole(users, getCompanyDTO.getName(), "DRIVER");
+            long countLogist = contUserByRole(users, getCompanyDTO.getName(), "LOGIST");
 
-        return Mapper.getCompanyFromRepresentation(clientRepresentation, countDriver, countLogist);
+            return Mapper.getCompanyFromRepresentation(clientRepresentation, countDriver, countLogist);
+        } catch (ClientNotFoundException e){
+            throw new CompanyNotFoundException("Company not found");
+        }
     }
 
     public List<MinCompanyDTO> getCompanies(GetPagingDTO pagingDTO){

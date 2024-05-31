@@ -99,7 +99,6 @@ public class KeycloakService {
         } catch (Exception e){
             throw new ClientNotFoundException("");
         }
-
     }
 
     public void addClientRole(String userId, ClientResource clientResource, String clientId,String role){

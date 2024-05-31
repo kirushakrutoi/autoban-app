@@ -2,6 +2,8 @@ package ru.kirill.portalService.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.kirill.portalService.exceptions.CarAlreadyExistException;
+import ru.kirill.portalService.exceptions.userexception.ForbiddenException;
 import ru.kirill.portalService.model.Car;
 import ru.kirill.portalService.model.User;
 import ru.kirill.portalService.repositories.CarRepository;
@@ -10,17 +12,17 @@ import ru.kirill.portalService.repositories.CarRepository;
 public class CarService {
     @Autowired
     private CarRepository carRepository;
-    public void addCar(Car car, User user){
+    public void addCar(Car car, User user) throws ForbiddenException, CarAlreadyExistException {
         if(!user.getClientRoles().containsKey(car.getCompany()))
-            return;
+            throw new ForbiddenException("Forbidden");
 
         if(!user.getClientRoles().get(car.getCompany()).equals("ADMIM") &&
                 !user.getClientRoles().get(car.getCompany()).equals("LOGIST"))
-            return;
+            throw new ForbiddenException("Forbidden");
 
         try {
             if(carRepository.findByVin(car.getVin()).getCompany() != null)
-                return;
+                throw new CarAlreadyExistException("Car already exist");
         } catch (NullPointerException e){
         }
 

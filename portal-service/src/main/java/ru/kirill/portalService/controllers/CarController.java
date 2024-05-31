@@ -6,6 +6,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.kirill.portalService.exceptions.CarAlreadyExistException;
+import ru.kirill.portalService.exceptions.userexception.ForbiddenException;
 import ru.kirill.portalService.mappers.Mapper;
 import ru.kirill.portalService.model.Car;
 import ru.kirill.portalService.services.CarService;
@@ -17,9 +19,15 @@ public class CarController {
     private CarService carService;
 
     @PostMapping("/add")
-    public ResponseEntity<HttpStatus> addCar(@RequestBody Car car,
+    public ResponseEntity<String> addCar(@RequestBody Car car,
                                              @RequestHeader HttpHeaders headers) throws JsonProcessingException {
-        carService.addCar(car, Mapper.getUserFromHeaders(headers));
-        return new ResponseEntity<>(HttpStatus.OK);
+        try {
+            carService.addCar(car, Mapper.getUserFromHeaders(headers));
+            return new ResponseEntity<>(HttpStatus.CREATED);
+        } catch (CarAlreadyExistException | ForbiddenException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+
+
     }
 }

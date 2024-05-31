@@ -63,7 +63,7 @@ public class CompanyService {
     public FullCompanyDTO getCompany(GetCompanyDTO getCompanyDTO) throws CompanyNotFoundException {
         try {
             ClientRepresentation clientRepresentation = keycloakService.getClientResourceById(getCompanyDTO.getName()).toRepresentation();
-            List<UserRepresentation> users = keycloakService.getUserHasClientRole(getCompanyDTO.name);
+            List<UserRepresentation> users = keycloakService.getAllUSer();
             long countDriver = contUserByRole(users, getCompanyDTO.getName(), "DRIVER");
             long countLogist = contUserByRole(users, getCompanyDTO.getName(), "LOGIST");
 

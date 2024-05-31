@@ -117,8 +117,8 @@ public class KeycloakService {
         userResource.roles().clientLevel(clientID).remove(roles);
     }
 
-    public List<UserRepresentation> getUserHasClientRole(String clientId){
-        return realm.users().searchByAttributes(clientId);
+    public List<UserRepresentation> getAllUSer(){
+        return realm.users().list();
     }
 
     public List<ClientRepresentation> getAllClients(){

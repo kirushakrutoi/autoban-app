@@ -117,7 +117,7 @@ public class UserService {
         }
 
 
-        List<UserRepresentation> users = keycloakService.getUserHasClientRole(companyDTO.getName());
+        List<UserRepresentation> users = keycloakService.getAllUSer();
 
         List<UserRepresentation> usersFromCompany = getUsersFromCompany(users, companyDTO.getName());
 

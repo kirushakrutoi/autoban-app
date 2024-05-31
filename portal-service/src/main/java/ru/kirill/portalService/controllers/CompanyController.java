@@ -7,11 +7,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.kirill.portalService.mappers.Mapper;
-import ru.kirill.portalService.model.DTOs.AdataDto;
-import ru.kirill.portalService.model.DTOs.UserDTO;
+import ru.kirill.portalService.model.DTOs.*;
 import ru.kirill.portalService.services.AdataService;
 import ru.kirill.portalService.services.CompanyService;
 import ru.kirill.portalService.services.KeycloakService;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/company")
@@ -29,11 +30,13 @@ public class CompanyController {
         return companyService.createCompany(adataDto, Mapper.getUserFromHeaders(headers));
     }
 
-/*    @PostMapping("/add/user")
-    public ResponseEntity<HttpStatus> addUser(@RequestBody UserDTO userDTO,
-                                              @RequestHeader HttpHeaders headers) throws JsonProcessingException {
-        companyService.addClientRoleForExistUser(userDTO, Mapper.getUserFromHeaders(headers));
-        System.out.println("asdf");
-        return new ResponseEntity<>(HttpStatus.OK);
-    }*/
+    @GetMapping("/get")
+    public ResponseEntity<FullCompanyDTO> getCompany(@RequestBody GetCompanyDTO getCompanyDTO){
+        return new ResponseEntity<>(companyService.getCompany(getCompanyDTO), HttpStatus.OK);
+    }
+
+    @GetMapping("/get/all/paging")
+    public ResponseEntity<List<MinCompanyDTO>> getCompanies(@RequestBody GetPagingDTO pagingDTO){
+        return new ResponseEntity<>(companyService.getCompanies(pagingDTO), HttpStatus.OK);
+    }
 }

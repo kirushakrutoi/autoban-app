@@ -14,11 +14,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import ru.kirill.portalService.mappers.Mapper;
-import ru.kirill.portalService.model.DTOs.NewUserDTO;
-import ru.kirill.portalService.model.DTOs.RegisterDTO;
-import ru.kirill.portalService.model.DTOs.ResetPasswordDTO;
-import ru.kirill.portalService.model.DTOs.UserDTO;
+import ru.kirill.portalService.model.DTOs.*;
 import ru.kirill.portalService.model.User;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @Data
@@ -82,6 +82,59 @@ public class UserService {
 
         userResource.resetPassword(credential);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    public ResponseEntity<HttpStatus> changeData(ChangeDataDTO changeDataDTO, User user){
+        UserResource userResource = keycloakService.getUserResource(user.getUserId());
+        UserRepresentation userRepresentation = userResource.toRepresentation();
+
+        changeUserRepresentation(changeDataDTO, userRepresentation);
+
+        userResource.update(userRepresentation);
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    public List<UserDTO> getUsers(GetCompanyDTO companyDTO, User user){
+        if(!user.getClientRoles().containsKey(companyDTO.getName())){
+            return null;
+        }
+
+        if(!user.getClientRoles().get(companyDTO.getName()).equals("ADMIN")){
+            return null;
+        }
+
+        List<UserRepresentation> users = keycloakService.getUserHasClientRole(companyDTO.getName());
+
+        List<UserRepresentation> usersFromCompany = getUsersFromCompany(users, companyDTO.getName());
+
+        List<UserDTO> userDTOS = new ArrayList<>();
+
+        for(UserRepresentation userRepresentation : usersFromCompany){
+            userDTOS.add(Mapper.getUserDTOFromRepresentation(userRepresentation, companyDTO.getName()));
+        }
+
+        return userDTOS;
+
+    }
+
+    public List<UserRepresentation> getUsersFromCompany(List<UserRepresentation> usersRepresentation, String companyName){
+        List<UserRepresentation> users = new ArrayList<>();
+        for (UserRepresentation user : usersRepresentation){
+            if(user.getAttributes().containsKey(companyName))
+                users.add(user);
+        }
+        return users;
+    }
+    public void changeUserRepresentation(ChangeDataDTO changeDataDTO, UserRepresentation userRepresentation){
+        if(changeDataDTO.getFirstName() != null)
+            userRepresentation.setFirstName(changeDataDTO.getFirstName());
+
+        if(changeDataDTO.getLastName() != null)
+            userRepresentation.setLastName(changeDataDTO.getLastName());
+
+        if(changeDataDTO.getEmail() != null)
+            userRepresentation.setEmail(changeDataDTO.getEmail());
     }
 
     public void setClientRole(String companyName, String companyRole, String username){

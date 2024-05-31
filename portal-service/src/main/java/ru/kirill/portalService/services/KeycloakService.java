@@ -72,6 +72,7 @@ public class KeycloakService {
     }
 
     public UserResource getUserResource(String id){
+        realm.users().searchByAttributes("company");
         return realm.users().get(id);
     }
 
@@ -102,6 +103,14 @@ public class KeycloakService {
         if(roles.isEmpty())
             return;
         userResource.roles().clientLevel(clientID).remove(roles);
+    }
+
+    public List<UserRepresentation> getUserHasClientRole(String clientId){
+        return realm.users().searchByAttributes(clientId);
+    }
+
+    public List<ClientRepresentation> getAllClients(){
+        return realm.clients().findAll();
     }
 
     private void sendPassword(UserRepresentation userRepresentation) {

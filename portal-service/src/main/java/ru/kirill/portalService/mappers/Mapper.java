@@ -7,8 +7,7 @@ import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
-import ru.kirill.portalService.model.DTOs.CompanyDTO;
-import ru.kirill.portalService.model.DTOs.RegisterDTO;
+import ru.kirill.portalService.model.DTOs.*;
 import ru.kirill.portalService.model.User;
 import ru.kirill.portalService.services.GeneratePasswordService;
 
@@ -57,6 +56,36 @@ public class Mapper {
         clientRepresentation.setClientId(companyDTO.getName());
         clientRepresentation.setAttributes(createAttributes(companyDTO));
         return clientRepresentation;
+    }
+
+    public static FullCompanyDTO getCompanyFromRepresentation(ClientRepresentation clientRepresentation, long countDriver, long countLogist){
+        FullCompanyDTO companyDTO = new FullCompanyDTO();
+        Map<String, String> attributes = clientRepresentation.getAttributes();
+        companyDTO.setAddress(attributes.get("address"));
+        companyDTO.setName(clientRepresentation.getClientId());
+        companyDTO.setKpp(attributes.get("kpp"));
+        companyDTO.setInn(attributes.get("inn"));
+        companyDTO.setOgrn(attributes.get("ogrn"));
+        companyDTO.setId(clientRepresentation.getId());
+        companyDTO.setCountDriver(countDriver);
+        companyDTO.setCountLogist(countLogist);
+        return companyDTO;
+    }
+
+    public static MinCompanyDTO getCompanyFromRepresentation(ClientRepresentation clientRepresentation){
+        MinCompanyDTO minCompanyDTO = new MinCompanyDTO();
+        minCompanyDTO.setId(clientRepresentation.getId());
+        minCompanyDTO.setName(clientRepresentation.getClientId());
+        minCompanyDTO.setInn(clientRepresentation.getAttributes().get("inn"));
+        return minCompanyDTO;
+    }
+
+    public static UserDTO getUserDTOFromRepresentation(UserRepresentation userRepresentation, String companyName){
+        UserDTO userDTO = new UserDTO();
+        userDTO.setUsername(userRepresentation.getUsername());
+        userDTO.setCompanyName(companyName);
+        userDTO.setCompanyRole(userRepresentation.firstAttribute(companyName));
+        return userDTO;
     }
 
     private static Map<String, String> createAttributes(CompanyDTO companyDTO){

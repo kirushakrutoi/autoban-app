@@ -29,6 +29,11 @@ public class UserDetailsImpl implements UserDetails {
             authorities.add(authority);
         }
 
+        for(Map.Entry<String, String> entry : clientRoles.entrySet()){
+            SimpleGrantedAuthority authority = new SimpleGrantedAuthority(entry.getValue());
+            authorities.add(authority);
+        }
+
         return authorities;
     }
 

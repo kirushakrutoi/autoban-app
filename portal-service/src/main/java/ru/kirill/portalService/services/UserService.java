@@ -25,8 +25,7 @@ import ru.kirill.portalService.mappers.Mapper;
 import ru.kirill.portalService.model.DTOs.*;
 import ru.kirill.portalService.model.User;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Service
 @Data
@@ -100,18 +99,18 @@ public class UserService {
     }
 
     public List<UserDTO> getUsers(GetCompanyDTO companyDTO, User user) throws ForbiddenException, CompanyNotFoundException {
+        try {
+            keycloakService.getClientIdByName(companyDTO.getName());
+        } catch (ClientNotFoundException e){
+            throw new CompanyNotFoundException("Company not found");
+        }
+
         if(!user.getClientRoles().containsKey(companyDTO.getName())){
             throw new ForbiddenException("You don't have the necessary authority");
         }
 
         if(!user.getClientRoles().get(companyDTO.getName()).equals("ADMIN")){
             throw new ForbiddenException("You don't have the necessary authority");
-        }
-
-        try {
-            keycloakService.getClientIdByName(companyDTO.getName());
-        } catch (ClientNotFoundException e){
-            throw new CompanyNotFoundException("Company not found");
         }
 
 
@@ -131,7 +130,8 @@ public class UserService {
     public List<UserRepresentation> getUsersFromCompany(List<UserRepresentation> usersRepresentation, String companyName){
         List<UserRepresentation> users = new ArrayList<>();
         for (UserRepresentation user : usersRepresentation){
-            if(user.getAttributes().containsKey(companyName))
+            Map<String, List<String>> attributes = Optional.ofNullable(user.getAttributes()).orElse(new HashMap<>());
+            if(attributes.containsKey(companyName))
                 users.add(user);
         }
         return users;
@@ -152,8 +152,8 @@ public class UserService {
             String id = keycloakService.getUserIdByUserName(username);
             ClientResource clientResource = keycloakService.getClientResourceById(companyName);
             String clientID = keycloakService.getClientIdByName(companyName);
-            keycloakService.deleteClientRole(id, clientID);
-            keycloakService.addClientRole(id, clientResource, clientID, companyRole);
+            keycloakService.deleteClientRole(id, clientID, companyName);
+            keycloakService.addClientRole(id, clientResource, clientID, companyRole,companyName);
         } catch (Exception e){
             throw new RoleNotSetException(e.getMessage(), HttpStatus.BAD_REQUEST);
         }

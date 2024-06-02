@@ -55,10 +55,10 @@ public class KeycloakService {
     public void createCompany(ClientRepresentation clientRepresentation, User user) throws KeycloakException, UserNotFoundException, ClientNotFoundException {
         Response response = realm.clients().create(clientRepresentation);
 
-        ClientResource clientResource = getClientResourceById(getCreatedId(response));
+        ClientResource clientResource = getClientResourceById(clientRepresentation.getClientId());
         createClientRoles(clientResource);
 
-        addClientRole(user.getUserId(), clientResource, getCreatedId(response), "ADMIN");
+        addClientRole(user.getUserId(), clientResource, getCreatedId(response), "ADMIN", clientRepresentation.getClientId());
     }
 
     public UserRepresentation getUserRepresentationByUsername(String username){
@@ -101,19 +101,29 @@ public class KeycloakService {
         }
     }
 
-    public void addClientRole(String userId, ClientResource clientResource, String clientId,String role) throws UserNotFoundException {
+    public void addClientRole(String userId, ClientResource clientResource, String clientId,String role, String companyName) throws UserNotFoundException {
         UserResource userResource = getUserResource(userId);
+        UserRepresentation userRepresentation = userResource.toRepresentation();
+        Map<String, List<String>> attributes = Optional.ofNullable(userRepresentation.getAttributes()).orElse(new HashMap<>());
+        userRepresentation.setAttributes(attributes);
+        attributes.put(companyName, Collections.singletonList(role));
         RoleResource roleResource = clientResource.roles().get(role);
         RoleRepresentation roleRepresentation = roleResource.toRepresentation();
         userResource.roles().clientLevel(clientId).add(Collections.singletonList(roleRepresentation));
+        userResource.update(userRepresentation);
     }
 
-    public void deleteClientRole(String userId, String clientID) throws UserNotFoundException {
+    public void deleteClientRole(String userId, String clientID, String companyName) throws UserNotFoundException {
         UserResource userResource = getUserResource(userId);
+        UserRepresentation userRepresentation = userResource.toRepresentation();
+        Map<String, List<String>> attributes = Optional.ofNullable(userRepresentation.getAttributes()).orElse(new HashMap<>());
+        attributes.remove(companyName);
+        userRepresentation.setAttributes(attributes);
         List<RoleRepresentation> roles = Optional.ofNullable(userResource.roles().clientLevel(clientID).listAll()).orElse(new ArrayList<>());
         if(roles.isEmpty())
             return;
         userResource.roles().clientLevel(clientID).remove(roles);
+        userResource.update(userRepresentation);
     }
 
     public List<UserRepresentation> getAllUSer(){

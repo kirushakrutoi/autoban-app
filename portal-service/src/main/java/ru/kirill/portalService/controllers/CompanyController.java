@@ -35,7 +35,7 @@ public class CompanyController {
     @PostMapping("/create")
     public ResponseEntity<String> query(@RequestBody @Valid AdataDto adataDto,
                                         @RequestHeader HttpHeaders headers,
-                                        BindingResult bindingResult) throws JsonProcessingException {
+                                        BindingResult bindingResult) {
         if(bindingResult.hasErrors()){
             return new ResponseEntity<>(getErrorMessage(bindingResult), HttpStatus.BAD_REQUEST);
         }
@@ -45,7 +45,7 @@ public class CompanyController {
             return new ResponseEntity<>("The company has been successfully added", HttpStatus.CREATED);
         } catch (CompanyNotCreatedException e) {
             return new ResponseEntity<>(e.getMessage(), e.getStatus());
-        } catch (InvalidInnException | UserNotFoundException | CompanyNotFoundException e){
+        } catch (InvalidInnException | UserNotFoundException | CompanyNotFoundException | JsonProcessingException e){
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }

@@ -47,11 +47,13 @@ public class CompanyService {
     public void createCompany(AdataDto adataDto, User user) throws CompanyNotCreatedException, InvalidInnException, UserNotFoundException, CompanyNotFoundException {
         try {
             CompanyDTO companyDTO = adataService.getInfoByInn(adataDto);
-            if(companyDTO.getName() == null || companyDTO.getName().isEmpty()){
+
+            if(companyDTO.getName() == null || companyDTO.getName().isEmpty())
                 throw new InvalidInnException("Incorrect inn");
-            }
+
             ClientRepresentation clientRepresentation = Mapper.convertToClientRepresentation(companyDTO);
             keycloakService.createCompany(clientRepresentation, user);
+
         } catch (KeycloakException e){
             throw new CompanyNotCreatedException(e.getMessage(),
                     (HttpStatus) HttpStatusCode.valueOf(e.getResponse().getStatus()));

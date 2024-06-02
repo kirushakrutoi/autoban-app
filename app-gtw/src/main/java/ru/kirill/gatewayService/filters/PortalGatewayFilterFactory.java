@@ -43,6 +43,6 @@ public class PortalGatewayFilterFactory extends AbstractGatewayFilterFactory {
                         }
                         ServerWebExchange modifiedExchange = exchange.mutate().request(request).build();
                         return chain.filter(modifiedExchange);
-                    });
+                    }).switchIfEmpty(chain.filter(exchange));
     }
 }

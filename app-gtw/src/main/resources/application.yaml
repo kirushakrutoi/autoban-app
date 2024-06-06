@@ -36,6 +36,7 @@ spring:
             - Path=/logist/**
           filters:
             - RewritePath=/logist, /
+            - Portal
 
         - id: driver
           uri: http://localhost:8084

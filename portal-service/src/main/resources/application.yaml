@@ -14,7 +14,7 @@ spring:
   datasource:
     username: postgres
     password: 124491
-    url: jdbc:postgresql://localhost:5432/portal
+    url: jdbc:postgresql://portaldb:5432/portaldb
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -41,6 +41,9 @@ spring:
           auth: true
           starttls:
             enable: true
+  docker:
+    compose:
+      enabled: false
 
 adata:
   token: Token 7bfee02a63ecf31a6233e7f8c9c7827d8fd262e0
@@ -52,4 +55,5 @@ keycloak:
   realm: ${KEYCLOAK_REALM}
   host: localhost
   port: 8080
+
 

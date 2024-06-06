@@ -20,6 +20,7 @@ public class SecurityConfig {
         return http
                 .authenticationManager(authenticationProvider)
                 .authorizeExchange(configure -> configure
+                        .pathMatchers("/logist/**").hasAuthority("LOGIST")
                         .pathMatchers("/portal/company/get/all/paging").hasAuthority("ADMIN")
                         .pathMatchers("portal/company/get").hasAuthority("ADMIN")
                         .pathMatchers("/portal/car/add").hasAnyAuthority("ADMIN", "LOGIST")

@@ -1,13 +1,13 @@
 package ru.kirill.logistService.models.DTOs;
 
-import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import org.apache.kafka.common.protocol.types.Field;
 import ru.kirill.logistService.models.Point;
 
 @Data
-public class TaskDTO {
+public class CreateTaskDTO {
     @NotEmpty
     private String companyName;
     @NotNull
@@ -15,9 +15,9 @@ public class TaskDTO {
     @NotNull
     private Point endPoint;
     @NotNull
-    private DriverDTO driverDTO;
+    private String driverId;
     @NotEmpty
     private String orderDescription;
     @NotNull
-    private CarDTO carDTO;
+    private long carId;
 }

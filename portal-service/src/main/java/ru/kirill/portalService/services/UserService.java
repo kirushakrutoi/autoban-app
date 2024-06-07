@@ -5,9 +5,9 @@ import lombok.Data;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.ClientResource;
 import org.keycloak.admin.client.resource.RealmResource;
+import org.keycloak.admin.client.resource.RoleMappingResource;
 import org.keycloak.admin.client.resource.UserResource;
-import org.keycloak.representations.idm.CredentialRepresentation;
-import org.keycloak.representations.idm.UserRepresentation;
+import org.keycloak.representations.idm.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -125,6 +125,26 @@ public class UserService {
         }
 
         return userDTOS;
+    }
+
+    public DriverDTO getDriver(String id, User user, String companyNane) throws UserNotFoundException, ForbiddenException {
+        UserResource userResource = keycloakService.getUserResource(id);
+        Map<String, ClientMappingsRepresentation> roles = userResource.roles().getAll().getClientMappings();
+
+        boolean flag = false;
+        for(Map.Entry<String, ClientMappingsRepresentation> entry : roles.entrySet()){
+            if(entry.getValue().getClient().equals(companyNane) &&
+                entry.getValue().getMappings().get(0).toString().equals("DRIVER") &&
+                user.getClientRoles().containsKey(companyNane))
+                flag = true;
+        }
+
+        if(!flag)
+            throw new ForbiddenException("You are not a LOGIST of this company");
+
+        UserRepresentation driver = userResource.toRepresentation();
+
+        return Mapper.convertToDriverDTO(driver);
     }
 
     public List<UserRepresentation> getUsersFromCompany(List<UserRepresentation> usersRepresentation, String companyName){

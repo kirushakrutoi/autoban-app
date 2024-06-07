@@ -127,6 +127,22 @@ public class UserController {
 
     }
 
+    @PostMapping("/get/driver/{id}")
+    public ResponseEntity<?> getDriver(@PathVariable("id") String id,
+                                       @RequestHeader HttpHeaders headers,
+                                       @RequestBody GetCompanyDTO companyDTO){
+
+        try {
+            return new ResponseEntity<>(userService.getDriver(id, Mapper.getUserFromHeaders(headers), companyDTO.getName()), HttpStatus.OK);
+        } catch (UserNotFoundException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        } catch (ForbiddenException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private String getErrorMessage(BindingResult bindingResult){
         StringBuilder stringBuilder = new StringBuilder();
 

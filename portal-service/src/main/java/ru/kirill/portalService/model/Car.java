@@ -11,10 +11,12 @@ public class Car {
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-    @Column
+    @Column(unique = true)
     private String vin;
     @Column
     private int year;
     @Column
     private String company;
+    @Column(unique = true)
+    private String stateNumber;
 }

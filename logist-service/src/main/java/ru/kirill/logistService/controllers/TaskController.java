@@ -13,7 +13,8 @@ import ru.kirill.logistService.exceptions.ForbiddenException;
 import ru.kirill.logistService.exceptions.IncorrectDataException;
 import ru.kirill.logistService.exceptions.TaskNotFoundException;
 import ru.kirill.logistService.mappers.Mapper;
-import ru.kirill.logistService.models.DTOs.TaskDTO;
+import ru.kirill.logistService.models.DTOs.*;
+import ru.kirill.logistService.services.PortalClient;
 import ru.kirill.logistService.services.TaskService;
 
 import java.util.stream.Collectors;
@@ -23,6 +24,9 @@ import java.util.stream.Collectors;
 public class TaskController {
     @Autowired
     private TaskService taskService;
+
+    @Autowired
+    private PortalClient portalClient;
 
     @GetMapping("")
     public ResponseEntity<?> getAll(@RequestParam(value = "page", required = false) Integer page,
@@ -47,7 +51,7 @@ public class TaskController {
     }
 
     @PostMapping("")
-    public ResponseEntity<String> createTask(@RequestBody @Valid TaskDTO taskDTO,
+    public ResponseEntity<String> createTask(@RequestBody @Valid CreateTaskDTO createTaskDTO,
                                              @RequestHeader HttpHeaders headers,
                                              BindingResult bindingResult) throws JsonProcessingException {
 
@@ -55,6 +59,16 @@ public class TaskController {
             return new ResponseEntity<>(getErrorMessage(bindingResult), HttpStatus.BAD_REQUEST);
         }
         try {
+            DriverDTO driverDTO =
+                    portalClient.findDriverById(createTaskDTO.getDriverId(),
+                            headers.toSingleValueMap(), new CompanyDTO(createTaskDTO.getCompanyName()));
+
+            CarDTO carDTO =
+                    portalClient.findCarById(createTaskDTO.getCarId(),
+                            headers.toSingleValueMap(), new CompanyDTO(createTaskDTO.getCompanyName()));
+
+            TaskDTO taskDTO = Mapper.convertToTaskDTO(createTaskDTO, driverDTO, carDTO);
+
             taskService.create(taskDTO, Mapper.getUserFromHeaders(headers));
             return new ResponseEntity<>("The task was successfully created", HttpStatus.CREATED);
         } catch (ForbiddenException e){

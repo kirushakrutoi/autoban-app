@@ -88,6 +88,13 @@ public class Mapper {
         return userDTO;
     }
 
+    public static DriverDTO convertToDriverDTO(UserRepresentation userRepresentation){
+        DriverDTO driverDTO = new DriverDTO();
+        driverDTO.setFirstName(userRepresentation.getFirstName());
+        driverDTO.setLastName(userRepresentation.getLastName());
+        return driverDTO;
+    }
+
     private static Map<String, String> createAttributes(CompanyDTO companyDTO){
         Map<String, String> attributes = new HashMap<>();
         attributes.put("inn", companyDTO.getInn());

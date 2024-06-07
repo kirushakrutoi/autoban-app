@@ -18,12 +18,25 @@ public class Mapper {
         task.setCompanyName(taskDTO.getCompanyName());
         task.setEndPoint(taskDTO.getEndPoint());
         task.setStartPoint(taskDTO.getStartPoint());
-        task.setDriverFirstName(taskDTO.getDriverFirstName());
-        task.setDriverLastName(taskDTO.getDriverLastName());
+        task.setDriverFirstName(taskDTO.getDriverDTO().getFirstName());
+        task.setDriverLastName(taskDTO.getDriverDTO().getLastName());
         task.setOrderDescription(taskDTO.getOrderDescription());
-        task.setStateNumber(taskDTO.getStateNumber());
+        task.setStateNumber(taskDTO.getCarDTO().getStateNumber());
 
         return task;
+    }
+
+    public static TaskDTO convertToTaskDTO(CreateTaskDTO createTaskDTO, DriverDTO driverDTO, CarDTO carDTO){
+        TaskDTO taskDTO = new TaskDTO();
+
+        taskDTO.setCompanyName(createTaskDTO.getCompanyName());
+        taskDTO.setEndPoint(createTaskDTO.getEndPoint());
+        taskDTO.setStartPoint(createTaskDTO.getStartPoint());
+        taskDTO.setDriverDTO(driverDTO);
+        taskDTO.setOrderDescription(createTaskDTO.getOrderDescription());
+        taskDTO.setCarDTO(carDTO);
+
+        return taskDTO;
     }
 
     public static TaskDTO convertToTaskDTO(Task task){
@@ -32,10 +45,12 @@ public class Mapper {
         taskDTO.setCompanyName(task.getCompanyName());
         taskDTO.setEndPoint(task.getEndPoint());
         taskDTO.setStartPoint(task.getStartPoint());
-        taskDTO.setDriverFirstName(task.getDriverFirstName());
-        taskDTO.setDriverLastName(task.getDriverLastName());
+        DriverDTO driverDTO = new DriverDTO();
+        driverDTO.setFirstName(task.getDriverFirstName());
+        driverDTO.setLastName(task.getDriverLastName());
+        taskDTO.setDriverDTO(driverDTO);
         taskDTO.setOrderDescription(task.getOrderDescription());
-        taskDTO.setStateNumber(task.getStateNumber());
+        taskDTO.setCarDTO(new CarDTO(task.getStateNumber()));
 
         return taskDTO;
     }

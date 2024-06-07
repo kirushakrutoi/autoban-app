@@ -3,13 +3,16 @@ package ru.kirill.logistService.controllers;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import feign.Feign;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.kirill.logistService.kafka.KafkaProducer;
-import ru.kirill.logistService.models.DTOs.CreatePointDTO;
-import ru.kirill.logistService.models.DTOs.CreateRouteDTO;
-import ru.kirill.logistService.models.DTOs.EventDTO;
+import ru.kirill.logistService.models.DTOs.*;
+import ru.kirill.logistService.services.PortalClient;
 
 import java.time.LocalDateTime;
 
@@ -18,6 +21,8 @@ import java.time.LocalDateTime;
 public class Controller {
     @Autowired
     private KafkaProducer kafkaProducer;
+    @Autowired
+    private PortalClient portalClient;
     @GetMapping
     public String hello(){
         return "hello from logist service";
@@ -34,10 +39,17 @@ public class Controller {
         return "OK";
     }
 
-    @PostMapping("point")
+    @PostMapping("/point")
     public String pointMessage(@RequestBody CreatePointDTO pointDTO) throws JsonProcessingException {
         System.out.println(pointDTO.getRouteId());
         kafkaProducer.sendPointMessage(pointDTO);
         return "OK";
+    }
+
+    @GetMapping("/car/{id}")
+    public ResponseEntity<CarDTO> getCar(@PathVariable("id") long id,
+                                         @RequestHeader HttpHeaders headers,
+                                         @RequestBody CompanyDTO companyDTO){
+        return new ResponseEntity<>(portalClient.findCarById(id, headers.toSingleValueMap(), companyDTO), HttpStatus.OK);
     }
 }

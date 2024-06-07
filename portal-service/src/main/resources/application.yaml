@@ -14,7 +14,7 @@ spring:
   datasource:
     username: postgres
     password: 124491
-    url: jdbc:postgresql://portaldb:5432/portaldb
+    url: jdbc:postgresql://localhost:5432/portal
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:

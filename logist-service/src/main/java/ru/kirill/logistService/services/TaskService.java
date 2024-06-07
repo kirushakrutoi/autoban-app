@@ -9,6 +9,8 @@ import ru.kirill.logistService.exceptions.IncorrectDataException;
 import ru.kirill.logistService.exceptions.TaskNotFoundException;
 import ru.kirill.logistService.mappers.Mapper;
 import ru.kirill.logistService.models.DTOs.CreateRouteDTO;
+import ru.kirill.logistService.models.DTOs.CreateTaskDTO;
+import ru.kirill.logistService.models.DTOs.DriverDTO;
 import ru.kirill.logistService.models.DTOs.TaskDTO;
 import ru.kirill.logistService.models.Task;
 import ru.kirill.logistService.models.User;
@@ -21,6 +23,7 @@ import java.util.Optional;
 public class TaskService {
     @Autowired
     private TaskRepository taskRepository;
+    private PortalClient portalClient;
 
     public void create(TaskDTO taskDTO, User user) throws ForbiddenException {
         String companyName = taskDTO.getCompanyName();

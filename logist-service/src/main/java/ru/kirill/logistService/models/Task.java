@@ -25,6 +25,9 @@ public class Task {
     @JoinColumn(name = "endPoint", referencedColumnName = "id")
     private Point endPoint;
 
+    @Column(name = "driver_id")
+    private String driverId;
+
     @Column(name = "driver_first_name")
     private String driverFirstName;
 

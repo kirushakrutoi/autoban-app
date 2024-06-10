@@ -2,7 +2,6 @@ package ru.kirill.logistService.models.DTOs;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
-import ru.kirill.logistService.models.Status;
 
 import java.time.LocalDateTime;
 

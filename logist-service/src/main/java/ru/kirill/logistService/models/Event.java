@@ -2,6 +2,7 @@ package ru.kirill.logistService.models;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import ru.kirill.enums.Status;
 
 import java.time.LocalDateTime;
 

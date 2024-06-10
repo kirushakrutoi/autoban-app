@@ -9,4 +9,5 @@ import java.util.List;
 @Repository
 public interface TaskRepository extends JpaRepository<Task, Long> {
     public List<Task> findAllByCompanyName(String companyName);
+    public List<Task> findAllByDriverId(String driverId);
 }

@@ -3,6 +3,7 @@ package ru.kirill.logistService.services;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.kirill.enums.Status;
 import ru.kirill.logistService.exceptions.ForbiddenException;
 import ru.kirill.logistService.exceptions.IncorrectDataException;
 import ru.kirill.logistService.exceptions.RouteNotFoundException;

@@ -90,6 +90,7 @@ public class Mapper {
 
     public static DriverDTO convertToDriverDTO(UserRepresentation userRepresentation){
         DriverDTO driverDTO = new DriverDTO();
+        driverDTO.setId(userRepresentation.getId());
         driverDTO.setFirstName(userRepresentation.getFirstName());
         driverDTO.setLastName(userRepresentation.getLastName());
         return driverDTO;

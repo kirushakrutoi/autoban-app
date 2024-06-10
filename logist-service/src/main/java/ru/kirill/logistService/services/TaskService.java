@@ -16,6 +16,7 @@ import ru.kirill.logistService.models.Task;
 import ru.kirill.logistService.models.User;
 import ru.kirill.logistService.repositories.TaskRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -44,8 +45,12 @@ public class TaskService {
 
         Task task = OTask.get();
 
-        if(!checkAuthority(user, task.getCompanyName(), "LOGIST"))
-            throw new ForbiddenException("You are not a LOGIST of this company");
+        if(!checkAuthority(user, task.getCompanyName(), "LOGIST")){
+            if(!checkAuthority(user, task.getCompanyName(), "DRIVER"))
+                throw new ForbiddenException("You are not from this company");
+            if(!task.getDriverId().equals(user.getUserId()))
+                throw new ForbiddenException("This is not your task");
+        }
 
         return task;
     }
@@ -62,6 +67,11 @@ public class TaskService {
             throw new IncorrectDataException("Page or page size can't be empty");
 
         return taskRepository.findAllByCompanyName(companyName);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Task> getDriverTask(User user){
+        return Optional.ofNullable(taskRepository.findAllByDriverId(user.getUserId())).orElse(new ArrayList<>());
     }
 
     private boolean checkAuthority(User user, String companyName, String role){

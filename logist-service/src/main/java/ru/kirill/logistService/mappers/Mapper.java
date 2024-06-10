@@ -3,6 +3,8 @@ package ru.kirill.logistService.mappers;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpHeaders;
+import ru.kirill.enums.Status;
+import ru.kirill.exceptions.StatusNotExistException;
 import ru.kirill.logistService.exceptions.IncorrectStatusException;
 import ru.kirill.logistService.models.*;
 import ru.kirill.logistService.models.DTOs.*;
@@ -20,6 +22,7 @@ public class Mapper {
         task.setStartPoint(taskDTO.getStartPoint());
         task.setDriverFirstName(taskDTO.getDriverDTO().getFirstName());
         task.setDriverLastName(taskDTO.getDriverDTO().getLastName());
+        task.setDriverId(taskDTO.getDriverDTO().getId());
         task.setOrderDescription(taskDTO.getOrderDescription());
         task.setStateNumber(taskDTO.getCarDTO().getStateNumber());
 
@@ -46,6 +49,7 @@ public class Mapper {
         taskDTO.setEndPoint(task.getEndPoint());
         taskDTO.setStartPoint(task.getStartPoint());
         DriverDTO driverDTO = new DriverDTO();
+        driverDTO.setId(task.getDriverId());
         driverDTO.setFirstName(task.getDriverFirstName());
         driverDTO.setLastName(task.getDriverLastName());
         taskDTO.setDriverDTO(driverDTO);
@@ -88,7 +92,7 @@ public class Mapper {
         Event event = new Event();
         try {
             event.setStatus(Status.getStatByString(eventDTO.getStatus()));
-        } catch (IllegalArgumentException e){
+        } catch (StatusNotExistException e){
             throw new IncorrectStatusException("Incorrect status name");
         }
 

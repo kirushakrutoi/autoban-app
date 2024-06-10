@@ -4,6 +4,7 @@ import feign.Feign;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.kirill.enums.Status;
 import ru.kirill.logistService.exceptions.ForbiddenException;
 import ru.kirill.logistService.exceptions.IncorrectStatusException;
 import ru.kirill.logistService.exceptions.RouteNotFoundException;
@@ -11,7 +12,6 @@ import ru.kirill.logistService.mappers.Mapper;
 import ru.kirill.logistService.models.DTOs.EventDTO;
 import ru.kirill.logistService.models.Event;
 import ru.kirill.logistService.models.Route;
-import ru.kirill.logistService.models.Status;
 import ru.kirill.logistService.repositories.EventRepository;
 
 @Service
@@ -33,7 +33,7 @@ public class EventService {
             routeService.update(route);
 
         } else if (event.getStatus().equals(Status.ENDED)) {
-            route.setStartTime(event.getCreatedAt());
+            route.setEndTime(event.getCreatedAt());
             routeService.update(route);
         }
     }

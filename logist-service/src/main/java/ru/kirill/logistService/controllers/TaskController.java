@@ -1,6 +1,7 @@
 package ru.kirill.logistService.controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import feign.Headers;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -86,6 +87,13 @@ public class TaskController {
         } catch (ForbiddenException e){
             return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
         }
+    }
+
+    @GetMapping("/driver/get")
+    public ResponseEntity<?> getDriverTask(@RequestHeader HttpHeaders headers) throws JsonProcessingException {
+        return new ResponseEntity<>(
+                taskService.getDriverTask(Mapper.getUserFromHeaders(headers))
+                        .stream().map(Mapper::convertToTaskDTO).collect(Collectors.toList()), HttpStatus.OK);
     }
 
     private String getErrorMessage(BindingResult bindingResult){

@@ -25,20 +25,14 @@ import java.net.URI;
 import java.util.*;
 
 @Service
-@Data
+
 public class KeycloakService {
-    private final Keycloak keycloak;
     private final RealmResource realm;
-    @Value("${keycloak.realm}")
-    private String KEYCLOAK_REALM;
     private String ROLE_REGISTER = "REGISTER";
-    private MailSenderService mailSenderService;
-    @Autowired
-    private AdataService adataService;
+    private final MailSenderService mailSenderService;
 
     @Autowired
-    public KeycloakService(Keycloak keycloak, RealmResource realm, MailSenderService mailSenderService, AdataService adataService) {
-        this.keycloak = keycloak;
+    public KeycloakService(RealmResource realm, MailSenderService mailSenderService) {
         this.realm = realm;
         this.mailSenderService = mailSenderService;
     }

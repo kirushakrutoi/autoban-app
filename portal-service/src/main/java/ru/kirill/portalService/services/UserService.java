@@ -28,21 +28,14 @@ import ru.kirill.portalService.model.User;
 import java.util.*;
 
 @Service
-@Data
 public class UserService {
     private final KeycloakService keycloakService;
-    private final RealmResource realm;
     @Value("${keycloak.realm}")
     private String KEYCLOAK_REALM;
-    private String ROLE_REGISTER = "REGISTER";
-    private MailSenderService mailSenderService;
-    @Autowired
-    private AdataService adataService;
+    private final String ROLE_REGISTER = "REGISTER";
 
     @Autowired
-    public UserService(RealmResource realm, MailSenderService mailSenderService, AdataService adataService, KeycloakService keycloakService) {
-        this.realm = realm;
-        this.mailSenderService = mailSenderService;
+    public UserService(KeycloakService keycloakService) {
         this.keycloakService = keycloakService;
     }
 

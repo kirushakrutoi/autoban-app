@@ -13,10 +13,14 @@ import ru.kirill.logistService.repositories.PointRepository;
 
 @Service
 public class PointService {
+    private final PointRepository pointRepository;
+    private final RouteService routeService;
+
     @Autowired
-    private PointRepository pointRepository;
-    @Autowired
-    private RouteService routeService;
+    public PointService(PointRepository pointRepository, RouteService routeService) {
+        this.pointRepository = pointRepository;
+        this.routeService = routeService;
+    }
 
     @Transactional
     public void create(CreatePointDTO pointDTO) throws RouteNotFoundException {

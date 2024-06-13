@@ -23,11 +23,14 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/task")
 public class TaskController {
-    @Autowired
-    private TaskService taskService;
+    private final TaskService taskService;
+    private final PortalClient portalClient;
 
     @Autowired
-    private PortalClient portalClient;
+    public TaskController(TaskService taskService, PortalClient portalClient) {
+        this.taskService = taskService;
+        this.portalClient = portalClient;
+    }
 
     @GetMapping("")
     public ResponseEntity<?> getAll(@RequestParam(value = "page", required = false) Integer page,

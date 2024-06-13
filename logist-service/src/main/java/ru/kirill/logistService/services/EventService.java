@@ -16,10 +16,16 @@ import ru.kirill.logistService.repositories.EventRepository;
 
 @Service
 public class EventService {
+
+    private final EventRepository eventRepository;
+
+    private final RouteService routeService;
+
     @Autowired
-    private EventRepository eventRepository;
-    @Autowired
-    private RouteService routeService;
+    public EventService(EventRepository eventRepository, RouteService routeService) {
+        this.eventRepository = eventRepository;
+        this.routeService = routeService;
+    }
 
     @Transactional
     public void create(EventDTO eventDTO) throws RouteNotFoundException, IncorrectStatusException {

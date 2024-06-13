@@ -25,7 +25,6 @@ import java.util.Optional;
 public class TaskService {
     @Autowired
     private TaskRepository taskRepository;
-    private PortalClient portalClient;
 
     public void create(TaskDTO taskDTO, User user) throws ForbiddenException {
         String companyName = taskDTO.getCompanyName();

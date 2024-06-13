@@ -16,10 +16,15 @@ import ru.kirill.logistService.services.EventService;
 
 @Service
 public class EventConsumer {
+    private final EventService eventService;
+    private final ObjectMapper objectMapper;
+
     @Autowired
-    private EventService eventService;
-    @Autowired
-    private ObjectMapper objectMapper;
+    public EventConsumer(EventService eventService, ObjectMapper objectMapper) {
+        this.eventService = eventService;
+        this.objectMapper = objectMapper;
+    }
+
     @KafkaListener(topics = "event", groupId = "asdf")
     public void listen(ConsumerRecord<String, String> record) throws IncorrectDataException {
 

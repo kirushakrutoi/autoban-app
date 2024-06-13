@@ -19,10 +19,15 @@ import ru.kirill.logistService.services.PointService;
 
 @Service
 public class LocationPointConsumer {
+    private final PointService pointService;
+    private final ObjectMapper objectMapper;
+
     @Autowired
-    private PointService pointService;
-    @Autowired
-    private ObjectMapper objectMapper;
+    public LocationPointConsumer(PointService pointService, ObjectMapper objectMapper) {
+        this.pointService = pointService;
+        this.objectMapper = objectMapper;
+    }
+
     @KafkaListener(topics = "point", groupId = "asdf")
     public void listen(ConsumerRecord<String, String> record) throws IncorrectDataException {
         try {

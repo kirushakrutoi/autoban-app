@@ -26,22 +26,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@Data
 public class CompanyService {
-    private KeycloakService keycloakService;
-    private final RealmResource realm;
-    @Value("${keycloak.realm}")
-    private String KEYCLOAK_REALM;
-    private String ROLE_REGISTER = "REGISTER";
-    private MailSenderService mailSenderService;
-    @Autowired
-    private AdataService adataService;
+    private final KeycloakService keycloakService;
+    private final AdataService adataService;
 
     @Autowired
-    public CompanyService(RealmResource realm, MailSenderService mailSenderService, AdataService adataService, KeycloakService keycloakService) {
-        this.realm = realm;
-        this.mailSenderService = mailSenderService;
+    public CompanyService(AdataService adataService, KeycloakService keycloakService) {
         this.keycloakService = keycloakService;
+        this.adataService = adataService;
     }
 
     public void createCompany(AdataDto adataDto, User user) throws CompanyNotCreatedException, InvalidInnException, UserNotFoundException, CompanyNotFoundException {

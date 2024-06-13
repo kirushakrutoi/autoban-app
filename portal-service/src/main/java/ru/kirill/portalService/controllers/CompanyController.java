@@ -25,12 +25,12 @@ import java.util.List;
 @RestController
 @RequestMapping("/company")
 public class CompanyController {
+    private final CompanyService companyService;
+
     @Autowired
-    private CompanyService companyService;
-    @Autowired
-    private KeycloakService keycloakService;
-    @Autowired
-    private AdataService adataService;
+    public CompanyController(CompanyService companyService) {
+        this.companyService = companyService;
+    }
 
     @PostMapping("/create")
     public ResponseEntity<String> query(@RequestBody @Valid AdataDto adataDto,

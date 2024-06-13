@@ -22,12 +22,16 @@ import java.util.Optional;
 
 @Service
 public class RouteService {
+    private final RouteRepository routeRepository;
+    private final EventRepository eventRepository;
+    private final TaskService taskService;
+
     @Autowired
-    private RouteRepository routeRepository;
-    @Autowired
-    private EventRepository eventRepository;
-    @Autowired
-    private TaskService taskService;
+    public RouteService(RouteRepository routeRepository, EventRepository eventRepository, TaskService taskService) {
+        this.routeRepository = routeRepository;
+        this.eventRepository = eventRepository;
+        this.taskService = taskService;
+    }
 
     @Transactional(readOnly = true)
     public Route get(long id) throws RouteNotFoundException {

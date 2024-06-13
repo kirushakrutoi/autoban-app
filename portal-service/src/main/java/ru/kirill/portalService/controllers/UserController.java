@@ -30,10 +30,6 @@ import java.util.List;
 public class UserController {
     @Autowired
     private UserService userService;
-    @Autowired
-    private KeycloakService keycloakService;
-    @Autowired
-    private AdataService adataService;
 
     @PostMapping("/create/register")
     public ResponseEntity<String> createRegister(@RequestBody @Valid RegisterDTO registerDTO,

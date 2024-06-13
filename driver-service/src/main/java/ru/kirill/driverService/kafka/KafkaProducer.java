@@ -12,10 +12,14 @@ import ru.kirill.models.DTOs.EventDTO;
 
 @Service
 public class KafkaProducer {
+    private final KafkaTemplate<String, String> kafkaTemplate;
+    private final ObjectMapper objectMapper;
+
     @Autowired
-    private KafkaTemplate<String, String> kafkaTemplate;
-    @Autowired
-    private ObjectMapper objectMapper;
+    public KafkaProducer(KafkaTemplate<String, String> kafkaTemplate, ObjectMapper objectMapper) {
+        this.kafkaTemplate = kafkaTemplate;
+        this.objectMapper = objectMapper;
+    }
 
     public void sendEventMessage(EventDTO eventDTO) throws JsonProcessingException, StatusNotExistException {
         Status.getStatByString(eventDTO.getStatus());

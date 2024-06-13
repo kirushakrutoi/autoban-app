@@ -53,8 +53,6 @@ public class KafkaProducer {
         LocalDate now = LocalDate.now();
         Map<String, CompanyStatDTO> companiesStat = countStat(tasks, now);
 
-        System.out.println(objectMapper.writeValueAsString(companiesStat.values()));
-
         kafkaTemplate.send("stat", objectMapper.writeValueAsString(companiesStat.values()));
     }
 

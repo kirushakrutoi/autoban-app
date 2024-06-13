@@ -35,8 +35,6 @@ public class StatConsumer {
 
         List<CompanyStat> companyStats = companyStatDTOs.stream().map(Mapper::convertToCompanyStat).collect(Collectors.toList());
 
-        for(CompanyStat companyStat : companyStats){
-            statService.saveStat(companyStat);
-        }
+        statService.saveStats(companyStats);
     }
 }

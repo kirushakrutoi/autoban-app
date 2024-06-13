@@ -2,12 +2,14 @@ package ru.kirill.dwhService.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.kirill.dwhService.exceptions.CompanyNotFoundException;
 import ru.kirill.dwhService.exceptions.ForbiddenException;
 import ru.kirill.dwhService.models.CompanyStat;
 import ru.kirill.dwhService.repositories.StatRepository;
 import ru.kirill.models.User;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -15,6 +17,7 @@ public class StatService {
     @Autowired
     private StatRepository statRepository;
 
+    @Transactional(readOnly = true)
     public CompanyStat getStat(String companyName, User user) throws ForbiddenException, CompanyNotFoundException {
             Optional<CompanyStat> OStat = statRepository.findByCompanyName(companyName);
 
@@ -31,6 +34,13 @@ public class StatService {
 
     public void saveStat(CompanyStat companyStat){
         statRepository.save(companyStat);
+    }
+
+    @Transactional
+    public void saveStats(List<CompanyStat> companyStats){
+        for(CompanyStat companyStat : companyStats){
+            saveStat(companyStat);
+        }
     }
 
     private boolean checkAuthority(User user, String companyName, String role) {

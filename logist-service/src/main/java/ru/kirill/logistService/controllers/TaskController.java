@@ -72,7 +72,7 @@ public class TaskController {
 
             taskService.create(taskDTO, Mapper.getUserFromHeaders(headers));
             return new ResponseEntity<>("The task was successfully created", HttpStatus.CREATED);
-        } catch (ForbiddenException e){
+        } catch (ForbiddenException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
         }
     }

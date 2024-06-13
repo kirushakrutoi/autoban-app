@@ -43,7 +43,6 @@ public class KeycloakService {
         this.mailSenderService = mailSenderService;
     }
 
-
     public void addUser(UserRepresentation userRepresentation) throws KeycloakException, UserNotFoundException {
         Response result = realm.users().create(userRepresentation);
 

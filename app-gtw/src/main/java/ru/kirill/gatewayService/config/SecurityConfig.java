@@ -20,6 +20,7 @@ public class SecurityConfig {
         return http
                 .authenticationManager(authenticationProvider)
                 .authorizeExchange(configure -> configure
+                        .pathMatchers("/dwh/**").hasAnyAuthority("LOGIST", "ADMIN")
                         .pathMatchers("/driver/**").hasAuthority("DRIVER")
                         .pathMatchers("/logist/route").hasAnyAuthority("DRIVER", "LOGIST")
                         .pathMatchers("/logist/task/driver/get").hasAnyAuthority("DRIVER", "LOGIST")

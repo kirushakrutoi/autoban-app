@@ -79,6 +79,11 @@ public class RouteService {
         return task.getRoutes();
     }
 
+    @Transactional(readOnly = true)
+    public List<Route> getAll() {
+        return routeRepository.findAll();
+    }
+
     private boolean checkAuthority(User user, String companyName, String role){
         if(!user.getClientRoles().containsKey(companyName))
             return false;

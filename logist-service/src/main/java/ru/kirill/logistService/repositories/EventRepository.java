@@ -6,4 +6,5 @@ import ru.kirill.logistService.models.Event;
 
 @Repository
 public interface EventRepository extends JpaRepository<Event, Long> {
+
 }

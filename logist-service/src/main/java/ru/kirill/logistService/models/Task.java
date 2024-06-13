@@ -3,6 +3,7 @@ package ru.kirill.logistService.models;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -16,6 +17,9 @@ public class Task {
 
     @Column(name = "company_name")
     private String companyName;
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "startPoint", referencedColumnName = "id")
@@ -42,6 +46,4 @@ public class Task {
 
     @OneToMany(mappedBy = "task", fetch = FetchType.EAGER)
     private List<Route> routes;
-
-
 }

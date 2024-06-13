@@ -44,6 +44,7 @@ spring:
             - Path=/driver/**
           filters:
             - RewritePath=/driver, /
+            - Portal=
 
         - id: dwh
           uri: http://localhost:8085
@@ -51,6 +52,7 @@ spring:
             - Path=/dwh/**
           filters:
             - RewritePath=/dwh, /
+            - Portal=
 
 eureka:
   client:

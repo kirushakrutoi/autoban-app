@@ -16,6 +16,7 @@ import ru.kirill.logistService.models.Task;
 import ru.kirill.logistService.models.User;
 import ru.kirill.logistService.repositories.TaskRepository;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -33,6 +34,8 @@ public class TaskService {
             throw new ForbiddenException("You are not a LOGIST of this company");
 
         Task task = Mapper.convertToTask(taskDTO);
+        task.setCreatedAt(LocalDateTime.now());
+
         taskRepository.save(task);
     }
 
@@ -67,6 +70,11 @@ public class TaskService {
             throw new IncorrectDataException("Page or page size can't be empty");
 
         return taskRepository.findAllByCompanyName(companyName);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Task> getAll(){
+        return taskRepository.findAll();
     }
 
     @Transactional(readOnly = true)

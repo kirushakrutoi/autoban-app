@@ -50,8 +50,16 @@ public class KafkaProducer {
 
     public void sendStat() throws JsonProcessingException {
         List<Task> tasks = taskService.getAll();
-        Map<String, CompanyStatDTO> companiesStat = new HashMap<>();
         LocalDate now = LocalDate.now();
+        Map<String, CompanyStatDTO> companiesStat = countStat(tasks, now);
+
+        System.out.println(objectMapper.writeValueAsString(companiesStat.values()));
+
+        kafkaTemplate.send("stat", objectMapper.writeValueAsString(companiesStat.values()));
+    }
+
+    private Map<String, CompanyStatDTO> countStat(List<Task> tasks, LocalDate now){
+        Map<String, CompanyStatDTO> companiesStat = new HashMap<>();
 
         for(Task task : tasks){
             if(task.getId() < 4)
@@ -59,47 +67,43 @@ public class KafkaProducer {
 
             String companyName = task.getCompanyName();
 
-            if(!companiesStat.containsKey(companyName)){
-                CompanyStatDTO companyStatDTO = new CompanyStatDTO();
-                companyStatDTO.setCompanyName(companyName);
-                companiesStat.put(companyName, companyStatDTO);
-            }
+            if(!companiesStat.containsKey(companyName))
+                addCompany(companiesStat, companyName);
 
             CompanyStatDTO companyStatDTO = companiesStat.get(companyName);
             LocalDate createTaskTime = task.getCreatedAt().toLocalDate();
 
-            if(now.equals(createTaskTime)){
+            if(now.equals(createTaskTime))
                 companyStatDTO.setCountTask(companyStatDTO.getCountTask() + 1);
-            }
 
             List<Route> routes = task.getRoutes();
-
-            for(Route route : routes){
-                LocalDate createRouteDate = route.getCreatedAt().toLocalDate();
-
-                if(now.equals(createRouteDate)){
-                    List<Event> events = route.getEvents();
-                    for(Event event : events){
-                        if(event.getStatus().equals(Status.STARTED))
-                            companyStatDTO.setCountStartedRoute(companyStatDTO.getCountStartedRoute() + 1);
-                        if(event.getStatus().equals(Status.CANCELLED))
-                            companyStatDTO.setCountCanceledRoute(companyStatDTO.getCountCanceledRoute() + 1);
-                        if(event.getStatus().equals(Status.ENDED))
-                            companyStatDTO.setCountEndedRoute(companyStatDTO.getCountEndedRoute() + 1);
-                    }
-                }
-
-            }
+            countRoutes(routes, companyStatDTO, now);
         }
-        String json = objectMapper.writeValueAsString(companiesStat);
-        System.out.println(json);
 
-        kafkaTemplate.send("stat", objectMapper.writeValueAsString(companiesStat.values()));
+        return companiesStat;
     }
 
     private void addCompany(Map<String, CompanyStatDTO> companiesStat, String companyName){
         CompanyStatDTO companyStatDTO = new CompanyStatDTO();
         companyStatDTO.setCompanyName(companyName);
         companiesStat.put(companyName, companyStatDTO);
+    }
+
+    private void countRoutes(List<Route> routes, CompanyStatDTO companyStatDTO, LocalDate now) {
+        for(Route route : routes){
+            LocalDate createRouteDate = route.getCreatedAt().toLocalDate();
+
+            if(now.equals(createRouteDate)){
+                List<Event> events = route.getEvents();
+                for(Event event : events){
+                    if(event.getStatus().equals(Status.STARTED))
+                        companyStatDTO.setCountStartedRoute(companyStatDTO.getCountStartedRoute() + 1);
+                    if(event.getStatus().equals(Status.CANCELLED))
+                        companyStatDTO.setCountCanceledRoute(companyStatDTO.getCountCanceledRoute() + 1);
+                    if(event.getStatus().equals(Status.ENDED))
+                        companyStatDTO.setCountEndedRoute(companyStatDTO.getCountEndedRoute() + 1);
+                }
+            }
+        }
     }
 }

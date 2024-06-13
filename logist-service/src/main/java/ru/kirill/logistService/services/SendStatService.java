@@ -12,7 +12,7 @@ public class SendStatService {
     @Autowired
     private KafkaProducer kafkaProducer;
 
-    @Scheduled(cron = "0 0 * * * *")
+    @Scheduled(cron = "0 * * * * *")
     public void executeHourlyTask() throws JsonProcessingException {
         kafkaProducer.sendStat();
     }
